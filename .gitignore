@@ -1,10 +1,105 @@
-.DS_Store
-applet
-application.linux-arm64
-application.linux-armv6hf
-application.linux32
-application.linux64
-application.windows32
-application.windows64
-application.macosx
-out
+# J'ai décidé de créer le programme d'un teckel humoristique. Son corps s'agrandit lorsque la souris est déplacée par l'utilisateur. 
+# Il est triste lorsqu'il est immobile et lorsque la souris est pressée il sourit. Cela montre qu'il est important 
+# de promener son chien. Ainsi, ce programme est destinée à un projet d'un site UI/UX à propos d'un refuge pour chiens 
+# qui donne des conseils pour mieux s'occuper de nos compagnons à quatre pattes. 
+
+numSegments = 40
+segmentX = [0] * numSegments  # x-coordinates of each segment
+segmentY = [0] * numSegments  # y-coordinates of each segment
+segmentSpacing = 100  # spacing between each segment
+isClicking = False
+startTime = 0
+
+
+def setup():
+    size(640, 360)
+    noStroke()
+
+def draw():
+    global segmentX, segmentY
+
+    background(150, 137, 227)
+
+    # Déplacer chaque segment à la position du segment précédent
+
+    for i in range(numSegments - 1, 0, -1):
+        segmentX[i] = segmentX[i - 1]
+        segmentY[i] = segmentY[i - 1]
+
+    # Réglez la position du premier segment sur la position de la souris
+
+    segmentX[0] = mouseX
+    segmentY[0] = mouseY
+
+    # Dessiner le corps du teckel et l'animation
+
+    fill(139, 69, 19)  # couleur marron
+    noStroke()
+    for i in range(numSegments):
+        ellipse(segmentX[i], segmentY[i], segmentSpacing, segmentSpacing)
+
+    if isClicking:
+        drawEmoji(mouseX, mouseY, millis() - startTime)
+
+def mousePressed():
+    global isClicking, startTime
+    isClicking = True
+    startTime = millis()
+
+
+# Dessiner la tête du chien
+
+def drawEmoji(x, y, clickDuration):
+
+    size = 100
+    eyeSize = size / 4
+    eyeOffset = size / 3
+    noseSize = size / 4
+    mouthWidth = size / 2
+    mouthHeight = map(constrain(clickDuration, 0, 2000), 0, 2000, size / 8, size / 2)
+
+# Dessiner la tête du chien
+
+    fill(160, 82, 45)
+    noStroke()
+    strokeWeight(2)
+    ellipse(x, y, size, size)
+
+# Dessiner les yeux du chien 
+
+    fill(255)
+    ellipse(x - eyeOffset, y - eyeOffset, eyeSize, eyeSize)
+    ellipse(x + eyeOffset, y - eyeOffset, eyeSize, eyeSize)
+
+    fill(66, 33, 11)
+    ellipse(x - eyeOffset, y - eyeOffset, eyeSize / 2, eyeSize / 2)
+    ellipse(x + eyeOffset, y - eyeOffset, eyeSize / 2, eyeSize / 2)
+
+# Dessiner le nez du chien 
+
+    fill(66, 33, 11)
+    rect(x - noseSize / 2, y - noseSize / 2, noseSize, noseSize, 20)
+
+# Dessiner la bouche du chien 
+
+    fill(66, 33, 11)
+    noStroke()
+    beginShape()
+    vertex(x - size / 2, y - size / 3)
+    bezierVertex(x - size, y, x - size, y + size / 2, x - size / 2, y + size / 3)
+    endShape(CLOSE)
+
+    beginShape()
+    vertex(x + size / 2, y - size / 3)
+    bezierVertex(x + size, y, x + size, y + size / 2, x + size / 2, y + size / 3)
+    endShape(CLOSE)
+
+# Régler l'animation de la bouche du chien qui sourit 
+
+    noFill()
+    stroke(66, 33, 11)
+    strokeWeight(4)
+    if clickDuration < 2000:
+        arc(x, y + size / 3, mouthWidth, mouthHeight, PI, TWO_PI)
+    else:
+        arc(x, y + size / 8, mouthWidth, mouthHeight, 0, PI)
